@@ -1,4 +1,4 @@
-import 'package:assignment_test/controller/weight/utiles.dart';
+import 'package:assignment_test/view/weight/utiles.dart';
 import 'package:assignment_test/model/Api_model.dart';
 import 'package:flutter/material.dart';
 

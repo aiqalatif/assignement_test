@@ -1,8 +1,8 @@
-import 'package:assignment_test/controller/provider.dart';
-import 'package:assignment_test/controller/weight/coming_soon_movie.dart';
-import 'package:assignment_test/controller/weight/custom_app_bar.dart';
-import 'package:assignment_test/controller/weight/custom_casual.dart';
-import 'package:assignment_test/controller/weight/upcoming_movie_card.dart';
+import 'package:assignment_test/reprovider/provider.dart';
+import 'package:assignment_test/view/weight/coming_soon_movie.dart';
+import 'package:assignment_test/view/weight/custom_app_bar.dart';
+import 'package:assignment_test/view/weight/custom_casual.dart';
+import 'package:assignment_test/view/weight/upcoming_movie_card.dart';
 import 'package:assignment_test/model/Api_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

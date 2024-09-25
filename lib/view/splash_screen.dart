@@ -1,4 +1,4 @@
-import 'package:assignment_test/controller/weight/bottam_navigation_br.dart';
+import 'package:assignment_test/view/weight/bottam_navigation_br.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:async';

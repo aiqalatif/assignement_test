@@ -1,4 +1,4 @@
-import 'package:assignment_test/controller/weight/landing_card.dart';
+import 'package:assignment_test/view/weight/landing_card.dart';
 import 'package:assignment_test/model/Api_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';

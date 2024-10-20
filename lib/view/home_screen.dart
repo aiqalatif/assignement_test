@@ -1,48 +1,95 @@
-import 'package:assignment_test/reprovider/provider.dart';
-import 'package:assignment_test/view/weight/coming_soon_movie.dart';
-import 'package:assignment_test/view/weight/custom_app_bar.dart';
-import 'package:assignment_test/view/weight/custom_casual.dart';
-import 'package:assignment_test/view/weight/upcoming_movie_card.dart';
-import 'package:assignment_test/model/Api_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
-  
+ // Adjust the import as needed
+// Adjust the import to your WeatherInfoWidget location
+
+
+
+import 'package:provider/provider.dart';
+import 'package:ui_flutter/view/weight/custom_app_br.dart';
+import 'package:ui_flutter/view/weight/custom_container.dart';
+import 'package:ui_flutter/view/weight/search_br.dart';import 'package:ui_flutter/services/api_services.dart';class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final moviesAsyncValue = ref.watch(movieListProvider);
+  State<HomePage> createState() => _HomePageState();
+}
 
-    return Scaffold(
-      appBar: const CustomAppBar(),
-      body: SingleChildScrollView(
-        child: Column(
+class _HomePageState extends State<HomePage> {
+  final TextEditingController _cityController = TextEditingController();
+
+  @override
+  void dispose() {
+    _cityController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final weatherProvider = Provider.of<WeatherProvider>(context);
+
+    return SafeArea(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(56.0),
+          child: CustomAppBr(
+            title: 'Weather App',
+            temperature: weatherProvider.weather?.humidity.toString() ?? 'N/A',
+          ),
+        ),
+        body: Stack(
           children: [
-            // Handle the state of the movies (loading, error, data) only once
-            moviesAsyncValue.when(
-              data: (movies) {
-                return Column(
-                  children: [
-                    CustomCarouselSlider(data: movies), // Carousel with movies
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      height: 220,
-                      child: UpcomingMovieCard(data: movies, headlineText: 'Now Playing'),
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 220,
-                      child: UpcomingMovieCard(data: movies, headlineText: 'Upcoming Movies'),
-                    ),
-                  ],
-                );
-              },
-              loading: () => const Center(
-                child: CircularProgressIndicator(), // Show a single loading indicator in the center
+            Positioned.fill(
+              child: Image.asset(
+                'assets/imagee.jpg',
+                fit: BoxFit.cover,
               ),
-              error: (error, stack) => Center(
-                child: Text('Error: $error'), // Display error message
+            ),
+            Container(),
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 40),
+                 // Inside the HomePage class
+
+CustomInput(
+  controller: _cityController,
+  hintText: 'Enter City Name',
+  onPressed: () {
+    if (_cityController.text.isNotEmpty) {
+      context.read<WeatherProvider>().fetchWeather(_cityController.text);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: const Text('Please enter a city name.')),
+      );
+    }
+  },
+),
+
+                    const SizedBox(height: 60),
+                    Consumer<WeatherProvider>(builder: (context, weatherProvider, child) {
+                      if (weatherProvider.isLoading) {
+                        return const Center(child: CircularProgressIndicator(color: Colors.white));
+                      }
+
+                      if (weatherProvider.weather != null) {
+                        return WeatherInfoWidget(weather: weatherProvider.weather!);
+                      }
+
+                      return const Text(
+                        "Enter a city name to get the weather info.",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 18,
+                        ),
+                      );
+                    }),
+                  ],
+                ),
               ),
             ),
           ],

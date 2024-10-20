@@ -1,36 +1,76 @@
-import 'dart:convert';
-import 'package:assignment_test/model/Api_model.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:weather/weather.dart';
+import 'package:ui_flutter/model/api_model.dart';
+import 'package:ui_flutter/view/weight/const.dart';
 
-class MovieRepository {
-  final String _baseUrl = 'https://api.tvmaze.com/search/shows?q=';
+class WeatherProvider with ChangeNotifier {
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  WeatherModel? _weatherModel;
+  bool _isLoading = false;
 
-  // Fetch all movies
-  Future<List<Show>> fetchMovies() async {
-    return await _fetchMoviesByQuery('all'); // Default fetch for all movies
+  final WeatherFactory _weatherFactory = WeatherFactory(OPENWEATHER_API_KEY);
+
+  WeatherModel? get weather => _weatherModel;
+  bool get isLoading => _isLoading;
+
+  WeatherProvider() {
+   
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  // Fetch movies by search term
-  Future<List<Show>> searchMovies(String searchTerm) async {
-    return await _fetchMoviesByQuery(searchTerm);
-  }
+  Future<void> fetchWeather(String city) async {
+    _isLoading = true;
+    notifyListeners();
 
-  // Private method to handle API requests
-  Future<List<Show>> _fetchMoviesByQuery(String query) async {
     try {
-      final response = await http.get(Uri.parse('$_baseUrl$query')); // Construct the URL with the query
+      Weather weather = await _weatherFactory.currentWeatherByCityName(city);
+      
+      _weatherModel = WeatherModel(
+        cityName: weather.areaName ?? '',
+        temperature: weather.temperature?.celsius ?? 0.0,
+        weatherCondition: weather.weatherMain ?? '',
+        weatherDescription: weather.weatherDescription ?? '',
+        weatherIcon: weather.weatherIcon ?? '',
+        humidity: weather.humidity ?? 0.0,
+        windSpeed: weather.windSpeed ?? 0.0,
+      );
 
-      if (response.statusCode == 200) {
-        final List moviesJson = json.decode(response.body); // Decode the response body
-        print(response.body);
-
-        // Map the DriverData to Show directly
-        return moviesJson.map<Show>((movie) => DriverData.fromJson(movie).show).toList();
-      } else {
-        throw Exception('Failed to load movies: ${response.statusCode}');
+      // Show notification if temperature exceeds 30°C
+      if (_weatherModel!.temperature > 20) {
+        _showNotification(_weatherModel!.cityName, _weatherModel!.temperature);
       }
     } catch (e) {
-      throw Exception('Failed to load movies: $e');
+      print("Error fetching weather: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
+  }
+
+  Future<void> _showNotification(String city, double temperature) async {
+    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+    print('Showing notification for $city with temperature $temperature');
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'weather_channel', 
+      'Weather Notifications', 
+      channelDescription: 'Notifications for temperature warnings',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0, 
+      'High Temperature Alert!', 
+      'The temperature in $city is $temperature°C, which exceeds 20°C!', 
+      platformChannelSpecifics,
+    );
   }
 }
